@@ -38,22 +38,6 @@ class Customers(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     USERNAME_FIELD = 'email'
 
-
-""" class Customers(models.Model):
-    customer_id = models.BigIntegerField(primary_key=True)
-    first_name = models.CharField(max_length=50)
-    middle_name = models.CharField(max_length=50)
-    first_surname = models.CharField(max_length=50)
-    second_surname = models.CharField(max_length=50)
-    #date = models.DateField()
-    phone = models.CharField(max_length=50)
-    email = models.EmailField(max_length=100)
-    departament = models.CharField(max_length=50)
-    city = models.CharField(max_length=50)
-    neighborhood = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    password = models.CharField(max_length=10, blank=True)
-    #active = models.BooleanField(default=True) """
 class Bike(models.Model):
     bike_id =  models.AutoField(primary_key=True)
     bike_name = models.CharField(max_length=50)
@@ -81,9 +65,3 @@ class Order(models.Model):
     price = models.DecimalField(max_digits=20, decimal_places=3, default=0)
     total = models.DecimalField(max_digits=20, decimal_places=3)
     fecha = models.DateTimeField(auto_now=True)
-   
-#OrderItem
-""" class OrderProduct(models.Model):
-    customer_order_id = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product_id = models.ForeignKey(Bike, on_delete=models.CASCADE)
-    cantidad = models.SmallIntegerField(default=1) """

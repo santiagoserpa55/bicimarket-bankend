@@ -10,7 +10,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Bike, Customers, Order
 
-# Create your views here.
+
 def newCustomer(request):
     if request.method == 'POST':
         try:
@@ -65,32 +65,7 @@ def getCustomers(request):
         return resp
     else:
         return HttpResponseNotAllowed(['GET'],"Metodo invalid")
-""" def getOneCustomer(request, id):
-    if request.method == 'GET':
-        customer = Customers.objects.filter(customer_id = id).first()
-        if (not customer):
-            return HttpResponseBadRequest("El cliente no existe.")
-        data = {
-            "documento": customer.customer_id,
-            "primernombre": customer.first_name,
-            "segundonombre": customer.middle_name,
-            "primerapellido": customer.first_surname,
-            "segundoapellido": customer.second_surname,
-            "telefono": customer.phone,
-            "correo": customer.email,
-            "departamento": customer.departament,
-            "ciudad": customer.city,
-            "barrio": customer.neighborhood,
-            "direccion": customer.address,
-            "contrasena": customer.password,
-        }
-        dataJson = json.dumps(data)
-        resp = HttpResponse()
-        resp.headers['Content-Type'] = "text/json"
-        resp.content = dataJson
-        return resp
-    else:
-        return HttpResponseNotAllowed(['GET'], "Método inválido") """
+
 def getOneCustomer(request, id):
     if request.method == 'GET':
         try:
@@ -112,11 +87,11 @@ def getOneCustomer(request, id):
         for order in orders:
             data = {
                 "id_order": order.id_order,
-                "product_id": order.product_id,
+                "product_id": str(order.product_id),#primero esta cambia a str()
                 "cantidad": order.cantidad,
                 "price": float(order.price),
                 "total": float(order.total),
-                "fecha": order.fecha
+                "fecha": str(order.fecha)#solo str()
             }
             ordersData.append(data)
 
@@ -157,27 +132,48 @@ def deleteCustomer(request, id):
 def updateCustomer(request, id):
     if request.method == 'PUT':
         try:
+            token = request.META.get('HTTP_AUTHORIZATION')[7:]
+            tokenBackend = TokenBackend(algorithm=settings.SIMPLE_JWT['ALGORITHM'])
+            valid_data = tokenBackend.decode(token, verify=False)
+            print(valid_data)
+            if valid_data['user_id'] != id:
+                raise Exception
+        except:
+            return HttpResponse("Credenciales inválidas. Acceso no autorizado", status=401)
+        try:
             customer = Customers.objects.filter(customer_id = id).first()
             if (not customer):
-                return HttpResponseBadRequest("EL cliente no existe")
+                return HttpResponseBadRequest("No existe cliente con esa cédula.")
+
             data = json.loads(request.body)
-            customer.first_name = data["primernombre"]
-            customer.middle_name = data["segundonombre"]
-            customer.first_surname = data["primerapellido"]
-            customer.second_surname = data["segundoapellido"]
-            customer.phone = data["telefono"]
-            customer.email = data["correo"]
-            customer.departament = data["departamento"]
-            customer.city = data["ciudad"]
-            customer.neighborhood = data["barrio"]
-            customer.address = data["direccion"]
-            customer.password = data["contrasena"]
+            if 'primernombre' in data.keys():
+                customer.first_name = data["primernombre"]
+            if 'segundonombre' in data.keys():
+                customer.middle_name = data["segundonombre"]
+            if 'primerapellido' in data.keys():
+                customer.first_surname = data["primerapellido"]
+            if 'segundoapellido' in data.keys():
+                customer.second_surname = data["segundoapellido"]
+            if 'telefono' in data.keys():
+                customer.phone = data["telefono"]
+            if 'correo' in data.keys():
+                customer.email = data["correo"]
+            if 'departamento' in data.keys():
+                customer.departament = data["departamento"]
+            if 'ciudad' in data.keys():
+                customer.city = data["ciudad"]
+            if 'barrio' in data.keys():
+                customer.neighborhood = data["barrio"]
+            if 'direccion' in data.keys():
+                customer.address = data["direccion"]
+            if 'contrasena' in data.keys():
+                customer.password = data["contrasena"]
             customer.save()
             return HttpResponse("Cliente Actualizado")
         except:
-            return HttpResponseBadRequest("Error en la data")
+            return HttpResponseBadRequest("Error en los datos enviados")
     else:
-        return HttpResponseNotAllowed(['PUT'],"Method invalid")       
+        return HttpResponseNotAllowed(['PUT'],"Método inválido")       
 
 #Bikes
 
